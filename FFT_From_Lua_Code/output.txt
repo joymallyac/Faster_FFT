@@ -1,0 +1,22 @@
+
+weatherLong.csv
+
+
+ Fast & Frugal Tree :
+if %outlook is over ==> 53
+else wind is TRUE ==> 49
+else wind is FALSE ==> 36
+# pass
+
+-----| test2 |-----------------------
+
+
+auto.csv
+
+
+ Fast & Frugal Tree :
+if origin is 3 ==> 73
+else %cylinders is 4 ==> 70
+else origin is 2 ==> 54
+else %cylinders is 6 ==> 38
+# pass
