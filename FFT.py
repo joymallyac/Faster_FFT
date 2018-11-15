@@ -7,9 +7,6 @@ import pandas as pd
 from helpers import get_performance, get_score, get_auc
 
 PRE, REC, SPEC, FPR, NPV, ACC, F1 = 7, 6, 5, 4, 3, 2, 1
-MATRIX = "\t".join(["\tTP", "FP", "TN", "FN"])
-PERFORMANCE = " \t".join(["\tCLF", "PRE ", "REC", "SPE", "FPR", "NPV", "ACC", "F_1"])
-store_cur_selected = [0,0,0,0]
 class FFT(object):
 
     def __init__(self, max_level=5):
@@ -18,8 +15,7 @@ class FFT(object):
         self.tree_cnt = cnt
         self.tree_depths = [0] * cnt
         self.best = -1
-        self.target = "" # "bug"
-        self.ignore = {}
+        self.target = ""
         self.split_method = "median"
         self.criteria = "Dist2Heaven"
         self.data_name = ''
@@ -35,20 +31,57 @@ class FFT(object):
         self.predictions = [None] * cnt
         self.loc_aucs = [None] * cnt
         self.print_enabled = False
+        self.store_cur_selected = [0,0,0,0]
+        self.first_thresholds = {}
 
-    # Build all possible tress.
-    def build_trees(self):	
-        self.structures = self.get_all_structure()
+
+
+    def build_trees1(self):
+        self.structures = [[1, 1, 1, 1], [1, 1, 1, 0], [1, 1, 0, 1], [1, 1, 0, 0], [1, 0, 1, 1], [1, 0, 1, 0], [1, 0, 0, 1], [1, 0, 0, 0],[0, 1, 1, 1], [0, 1, 1, 0], [0, 1, 0, 1], [0, 1, 0, 0], [0, 0, 1, 1], [0, 0, 1, 0], [0, 0, 0, 1], [0, 0, 0, 0]]
         data = self.train
-        store_tree = {}        
-        for i in range(self.tree_cnt):
+        store_tree = {}
+        for i in range(4):
             if i%2 == 0:
                 self.growEven(data, i, 0, [0, 0, 0, 0])
             else:
-                self.growOdd(store_cur_selected['undecided'], i, 3, store_cur_selected['metrics'])                
+                self.growOdd(self.store_cur_selected['undecided'], i, 3, self.store_cur_selected['metrics'])
             store_tree[i] = self.print_tree(i)
-        # for j in range(16):
-        #     print(store_tree[j])        
+        # for j in range(8):
+        #     print(store_tree[j])
+
+
+    def build_trees2(self):
+        self.structures = [[1, 1, 1, 1], [1, 1, 1, 0], [1, 1, 0, 1], [1, 1, 0, 0], [1, 0, 1, 1], [1, 0, 1, 0], [1, 0, 0, 1], [1, 0, 0, 0],[0, 1, 1, 1], [0, 1, 1, 0], [0, 1, 0, 1], [0, 1, 0, 0], [0, 0, 1, 1], [0, 0, 1, 0], [0, 0, 0, 1], [0, 0, 0, 0]]
+        data = self.train
+        for i in range(4,8):
+            if i%2 == 0:
+                self.growEven(data, i, 0, [0, 0, 0, 0])
+            else:
+                self.growOdd(self.store_cur_selected['undecided'], i, 3, self.store_cur_selected['metrics'])
+
+
+
+
+    def build_trees3(self):
+        self.structures = [[1, 1, 1, 1], [1, 1, 1, 0], [1, 1, 0, 1], [1, 1, 0, 0], [1, 0, 1, 1], [1, 0, 1, 0], [1, 0, 0, 1], [1, 0, 0, 0],[0, 1, 1, 1], [0, 1, 1, 0], [0, 1, 0, 1], [0, 1, 0, 0], [0, 0, 1, 1], [0, 0, 1, 0], [0, 0, 0, 1], [0, 0, 0, 0]]
+        data = self.train
+        for i in range(8,12):
+            if i%2 == 0:
+                self.growEven(data, i, 0, [0, 0, 0, 0])
+            else:
+                self.growOdd(self.store_cur_selected['undecided'], i, 3, self.store_cur_selected['metrics'])
+
+
+
+    def build_trees4(self):
+        self.structures = [[1, 1, 1, 1], [1, 1, 1, 0], [1, 1, 0, 1], [1, 1, 0, 0], [1, 0, 1, 1], [1, 0, 1, 0], [1, 0, 0, 1], [1, 0, 0, 0],[0, 1, 1, 1], [0, 1, 1, 0], [0, 1, 0, 1], [0, 1, 0, 0], [0, 0, 1, 1], [0, 0, 1, 0], [0, 0, 0, 1], [0, 0, 0, 0]]
+        data = self.train
+        for i in range(12,16):
+            if i%2 == 0:
+                self.growEven(data, i, 0, [0, 0, 0, 0])
+            else:
+                self.growOdd(self.store_cur_selected['undecided'], i, 3, self.store_cur_selected['metrics'])
+
 
 
     "Evaluate all tress built on TEST data."
@@ -79,16 +112,14 @@ class FFT(object):
 
     "Find the best tree based on the score in TRAIN data."
 
-    def find_best_tree(self):
+    def find_best_tree(self,start,end):
         if self.tree_scores and self.tree_scores[0]:
             return
-        if not self.performance_on_train or not self.performance_on_train[0]:
-            self.grow()
         if self.print_enabled:
             print ("\t----- PERFORMANCES FOR ALL FFTs on Training Data -----")
             print (PERFORMANCE + " \t" + self.criteria)
         best = [-1, float('inf')]
-        for i in range(self.tree_cnt):
+        for i in range(start,end):
             all_metrics = self.performance_on_train[i][self.tree_depths[i]]
             if self.criteria == "LOC_AUC":
                 score = self.loc_aucs[i]
@@ -182,41 +213,24 @@ class FFT(object):
 
     "Grow the t_id_th tree for the level with the given data. Also save its performance on the TRAIN data"
 
+    def call_eval_point_split(self, data, t_id, level, cur_performance,cur_selected,decision):
+        for cue in list(data):
+                if cue == self.target:
+                    continue
+                if level == 0 and t_id == 0 or t_id == 4 or t_id == 8 or t_id == 12:
+                    threshold = data[cue].median()
+                    self.first_thresholds[cue] = threshold
+                elif level == 0:
+                    threshold = self.first_thresholds[cue]
+                else:
+                    threshold = data[cue].median()
+                threshold = data[cue].median()
+                for direction in "><":
+                    cur_selected = self.eval_point_split(level, cur_selected, cur_performance, data, cue, direction, threshold, decision)
+        return cur_selected
+
+
     def growEven(self, data, t_id, level, cur_performance):
-        
-        if level >= self.max_depth:
-            return
-        if len(data) == 0:
-            print ("No data")
-            return
-        self.tree_depths[t_id] = level
-        decision = self.structures[t_id][level]
-        structure = tuple(self.structures[t_id][:level + 1])
-        cur_selected = self.computed_cache.get(structure, None)        
-        Y = data.as_matrix(columns=[self.target])
-        if not cur_selected:
-            for cue in list(data):
-                if cue in self.ignore or cue == self.target:
-                    continue                
-                thresholds = [data[cue].median()]                		
-                for threshold in thresholds:
-                    for direction in "><":
-                        cur_selected = self.eval_point_split(level, cur_selected, cur_performance, data, cue, direction, threshold, decision)
-            self.computed_cache[structure] = cur_selected
-        self.selected[t_id][level] = cur_selected['rule']
-        self.performance_on_train[t_id][level] = cur_selected['metrics'] + get_performance(cur_selected['metrics'])        
-        if level < 3 :
-            self.selected[t_id+1][level] = self.selected[t_id][level]
-            self.performance_on_train[t_id+1][level] = self.performance_on_train[t_id][level]        
-        if level == 2:
-            global store_cur_selected
-            store_cur_selected = cur_selected
-        self.growEven(cur_selected['undecided'], t_id, level + 1, cur_selected['metrics'])
-    
-
-
-    def growOdd(self, data, t_id, level, cur_performance):
-
         if level >= self.max_depth:
             return
         if len(data) == 0:
@@ -228,13 +242,33 @@ class FFT(object):
         cur_selected = self.computed_cache.get(structure, None)
         Y = data.as_matrix(columns=[self.target])
         if not cur_selected:
-            for cue in list(data):
-                if cue in self.ignore or cue == self.target:
-                    continue                
-                thresholds = [data[cue].median()]                
-                for threshold in thresholds:
-                    for direction in "><":
-                        cur_selected = self.eval_point_split(level, cur_selected, cur_performance, data, cue, direction, threshold, decision)                        
+            cur_selected = self.call_eval_point_split(data, t_id, level, cur_performance,cur_selected,decision)
+            self.computed_cache[structure] = cur_selected
+        self.selected[t_id][level] = cur_selected['rule']
+        self.performance_on_train[t_id][level] = cur_selected['metrics'] + get_performance(cur_selected['metrics'])
+        if level < 3 :
+            self.selected[t_id+1][level] = self.selected[t_id][level]
+            self.performance_on_train[t_id+1][level] = self.performance_on_train[t_id][level]
+        if level == 2:
+            #global store_cur_selected
+            self.store_cur_selected = cur_selected
+        self.growEven(cur_selected['undecided'], t_id, level + 1, cur_selected['metrics'])
+    
+
+
+    def growOdd(self, data, t_id, level, cur_performance):
+        if level >= self.max_depth:
+            return
+        if len(data) == 0:
+            print ("No data")
+            return
+        self.tree_depths[t_id] = level
+        decision = self.structures[t_id][level]
+        structure = tuple(self.structures[t_id][:level + 1])
+        cur_selected = self.computed_cache.get(structure, None)
+        Y = data.as_matrix(columns=[self.target])
+        if not cur_selected:
+            cur_selected = self.call_eval_point_split(data, t_id, level, cur_performance,cur_selected,decision)                        
             self.computed_cache[structure] = cur_selected
         self.selected[t_id][level] = cur_selected['rule']
         self.performance_on_train[t_id][level] = cur_selected['metrics'] + get_performance(cur_selected['metrics'])
@@ -261,21 +295,6 @@ class FFT(object):
                 data = undecided
         return string
 
-    "Get all possible tree structure"
-
-    def get_all_structure(self):
-        def dfs(cur, n):
-            if len(cur) == n:
-                ans.append(cur)
-                return
-            dfs(cur + [1], n)
-            dfs(cur + [0], n)
-
-        if self.max_depth < 0:
-            return []
-        ans = []
-        dfs([], self.max_depth)
-        return ans
 
     "Update the metrics(TP, FP, TN, FN) based on the decision."
 

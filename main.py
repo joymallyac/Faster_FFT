@@ -1,3 +1,4 @@
+from multiprocessing import Process,Manager
 from FFT import FFT
 from scipy.io import arff
 import pandas as pd
@@ -21,42 +22,71 @@ df7 = pd.read_csv('C:/Tim_Menzies/MY_FFT/defect-prediction/src/data/turk_labeled
 df8 = pd.read_csv('C:/Tim_Menzies/MY_FFT/defect-prediction/src/data/turk_labeled/abinit/abinit_8.csv')
 frames = [df1,df2,df3,df4,df5,df6,df7,df8]
 df = pd.concat(frames)
-# total_rows = df.shape[0]
+
 df.drop('Name',axis=1, inplace=True)
 df_1 = pd.read_csv('C:/Tim_Menzies/MY_FFT/defect-prediction/src/data/turk_labeled/abinit/abinit_9.csv')
 df_1.drop('Name',axis=1, inplace=True)
-# training_rows = (int)(total_rows * 8 / 10)
-# df_train = df.iloc[:(training_rows), :]
-# df_test = df.iloc[(training_rows):, :]
+
 df_train = df
 df_test = df_1
 
 
-# data = arff.loadarff('haberman.arff')
-# df = pd.DataFrame(data[0])
-# df_train = df
-# df_test = df
+def FFT1(fft, i , return_dict):
+    fft.build_trees1()
+    t_id = fft.find_best_tree(0, 4)
+    fft.eval_tree(t_id)
+    return_dict[i] = fft.performance_on_test[t_id][metrics_dic[i]]
 
-def FFT1():
-    dic={}
-    dic1={}
-    for i in metrics:
-        fft = FFT(max_level=5)
-        fft.criteria= 'recall'
-        fft.target = df.columns.values[-1]       
-        training_df = pd.DataFrame(df_train)
-        testing_df = pd.DataFrame(df_test)
-        fft.train, fft.test = training_df, testing_df
-        fft.build_trees()
-        t_id = fft.find_best_tree()    
-        fft.eval_tree(t_id)
-        description=fft.print_tree(t_id)        
-        dic[i]=fft.performance_on_test[t_id][metrics_dic[i]]
-        dic1[i]=description
-    print([dic])
+def FFT2(fft, i , return_dict):
+    fft.build_trees2()
+    t_id = fft.find_best_tree(4, 8)
+    fft.eval_tree(t_id)
+    return_dict[i] = fft.performance_on_test[t_id][metrics_dic[i]]
+
+def FFT3(fft, i , return_dict):
+    fft.build_trees3()
+    t_id = fft.find_best_tree(8, 12)
+    fft.eval_tree(t_id)
+    return_dict[i] = fft.performance_on_test[t_id][metrics_dic[i]]
+
+
+def FFT4(fft, i , return_dict):
+    fft.build_trees4()
+    t_id = fft.find_best_tree(12, 16)
+    fft.eval_tree(t_id)
+    return_dict[i] = fft.performance_on_test[t_id][metrics_dic[i]]
+
+
+if __name__ == '__main__':
+    dic = {}
+    dic1= {}
+    fft = FFT(max_level=5)
+    fft.criteria = 'recall'
+    fft.target = df.columns.values[-1]
+    training_df = pd.DataFrame(df_train)
+    testing_df = pd.DataFrame(df_test)
+    fft.train, fft.test = training_df, testing_df
+    for c,i in enumerate(metrics):
+        with Manager() as manager:
+            return_dict = manager.dict()
+            p1 = Process(target=FFT1, args=(fft,i,return_dict))
+            p2 = Process(target=FFT2, args=(fft,i,return_dict))
+            p3 = Process(target=FFT3, args=(fft, i, return_dict))
+            p4 = Process(target=FFT4, args=(fft, i, return_dict))
+            p1.start()
+            p2.start()
+            p3.start()
+            p4.start()
+            p1.join()
+            p2.join()
+            p3.join()
+            p4.join()
+            dic[i] = return_dict.values()
+    print(dic)
     end_time = time.time()
-    print('Execution Time',end_time - start_time)
+    print('Execution Time', end_time - start_time)
 
-FFT1()
+
+
 
 
