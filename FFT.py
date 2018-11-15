@@ -239,8 +239,7 @@ class FFT(object):
         self.tree_depths[t_id] = level
         decision = self.structures[t_id][level]
         structure = tuple(self.structures[t_id][:level + 1])
-        cur_selected = self.computed_cache.get(structure, None)
-        Y = data.as_matrix(columns=[self.target])
+        cur_selected = self.computed_cache.get(structure, None)        
         if not cur_selected:
             cur_selected = self.call_eval_point_split(data, t_id, level, cur_performance,cur_selected,decision)
             self.computed_cache[structure] = cur_selected
@@ -265,8 +264,7 @@ class FFT(object):
         self.tree_depths[t_id] = level
         decision = self.structures[t_id][level]
         structure = tuple(self.structures[t_id][:level + 1])
-        cur_selected = self.computed_cache.get(structure, None)
-        Y = data.as_matrix(columns=[self.target])
+        cur_selected = self.computed_cache.get(structure, None)        
         if not cur_selected:
             cur_selected = self.call_eval_point_split(data, t_id, level, cur_performance,cur_selected,decision)                        
             self.computed_cache[structure] = cur_selected

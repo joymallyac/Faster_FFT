@@ -12,19 +12,19 @@ metrics=['accuracy','recall','precision','false_alarm']
 metrics_dic={'accuracy':-2,'recall':-6,'precision':-7,'false_alarm':-4}
 
 start_time = time.time()
-df1 = pd.read_csv('C:/Tim_Menzies/MY_FFT/defect-prediction/src/data/turk_labeled/abinit/abinit_1.csv')
-df2 = pd.read_csv('C:/Tim_Menzies/MY_FFT/defect-prediction/src/data/turk_labeled/abinit/abinit_2.csv')
-df3 = pd.read_csv('C:/Tim_Menzies/MY_FFT/defect-prediction/src/data/turk_labeled/abinit/abinit_3.csv')
-df4 = pd.read_csv('C:/Tim_Menzies/MY_FFT/defect-prediction/src/data/turk_labeled/abinit/abinit_4.csv')
-df5 = pd.read_csv('C:/Tim_Menzies/MY_FFT/defect-prediction/src/data/turk_labeled/abinit/abinit_5.csv')
-df6 = pd.read_csv('C:/Tim_Menzies/MY_FFT/defect-prediction/src/data/turk_labeled/abinit/abinit_6.csv')
-df7 = pd.read_csv('C:/Tim_Menzies/MY_FFT/defect-prediction/src/data/turk_labeled/abinit/abinit_7.csv')
-df8 = pd.read_csv('C:/Tim_Menzies/MY_FFT/defect-prediction/src/data/turk_labeled/abinit/abinit_8.csv')
+df1 = pd.read_csv('defect-prediction/src/data/turk_labeled/abinit/abinit_1.csv')
+df2 = pd.read_csv('defect-prediction/src/data/turk_labeled/abinit/abinit_2.csv')
+df3 = pd.read_csv('defect-prediction/src/data/turk_labeled/abinit/abinit_3.csv')
+df4 = pd.read_csv('defect-prediction/src/data/turk_labeled/abinit/abinit_4.csv')
+df5 = pd.read_csv('defect-prediction/src/data/turk_labeled/abinit/abinit_5.csv')
+df6 = pd.read_csv('defect-prediction/src/data/turk_labeled/abinit/abinit_6.csv')
+df7 = pd.read_csv('defect-prediction/src/data/turk_labeled/abinit/abinit_7.csv')
+df8 = pd.read_csv('defect-prediction/src/data/turk_labeled/abinit/abinit_8.csv')
 frames = [df1,df2,df3,df4,df5,df6,df7,df8]
 df = pd.concat(frames)
 
 df.drop('Name',axis=1, inplace=True)
-df_1 = pd.read_csv('C:/Tim_Menzies/MY_FFT/defect-prediction/src/data/turk_labeled/abinit/abinit_9.csv')
+df_1 = pd.read_csv('defect-prediction/src/data/turk_labeled/abinit/abinit_9.csv')
 df_1.drop('Name',axis=1, inplace=True)
 
 df_train = df
@@ -68,11 +68,14 @@ if __name__ == '__main__':
     fft.train, fft.test = training_df, testing_df
     for c,i in enumerate(metrics):
         with Manager() as manager:
-            return_dict = manager.dict()
-            p1 = Process(target=FFT1, args=(fft,i,return_dict))
-            p2 = Process(target=FFT2, args=(fft,i,return_dict))
-            p3 = Process(target=FFT3, args=(fft, i, return_dict))
-            p4 = Process(target=FFT4, args=(fft, i, return_dict))
+            return_dict1 = manager.dict()
+            return_dict2 = manager.dict()
+            return_dict3 = manager.dict()
+            return_dict4 = manager.dict()
+            p1 = Process(target=FFT1, args=(fft,i,return_dict1))
+            p2 = Process(target=FFT2, args=(fft,i,return_dict2))
+            p3 = Process(target=FFT3, args=(fft, i, return_dict3))
+            p4 = Process(target=FFT4, args=(fft, i, return_dict4))
             p1.start()
             p2.start()
             p3.start()
@@ -81,7 +84,7 @@ if __name__ == '__main__':
             p2.join()
             p3.join()
             p4.join()
-            dic[i] = return_dict.values()
+            dic[i] = max(return_dict1.values()[0],return_dict2.values()[0],return_dict3.values()[0],return_dict4.values()[0])
     print(dic)
     end_time = time.time()
     print('Execution Time', end_time - start_time)
