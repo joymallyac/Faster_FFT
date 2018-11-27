@@ -12,20 +12,20 @@ metrics=['accuracy','recall','precision','false_alarm']
 metrics_dic={'accuracy':-2,'recall':-6,'precision':-7,'false_alarm':-4}
 
 start_time = time.time()
-df1 = pd.read_csv('abinit/abinit_1.csv')
-df2 = pd.read_csv('abinit/abinit_2.csv')
-df3 = pd.read_csv('abinit/abinit_3.csv')
-df4 = pd.read_csv('abinit/abinit_4.csv')
-df5 = pd.read_csv('abinit/abinit_5.csv')
-df6 = pd.read_csv('abinit/abinit_6.csv')
-df7 = pd.read_csv('abinit/abinit_7.csv')
-df8 = pd.read_csv('abinit/abinit_8.csv')
-df9 = pd.read_csv('abinit/abinit_9.csv')
+df1 = pd.read_csv('defect-prediction/src/data/turk_labeled/abinit/abinit_1.csv')
+df2 = pd.read_csv('defect-prediction/src/data/turk_labeled/abinit/abinit_2.csv')
+df3 = pd.read_csv('defect-prediction/src/data/turk_labeled/abinit/abinit_3.csv')
+df4 = pd.read_csv('defect-prediction/src/data/turk_labeled/abinit/abinit_4.csv')
+df5 = pd.read_csv('defect-prediction/src/data/turk_labeled/abinit/abinit_5.csv')
+df6 = pd.read_csv('defect-prediction/src/data/turk_labeled/abinit/abinit_6.csv')
+df7 = pd.read_csv('defect-prediction/src/data/turk_labeled/abinit/abinit_7.csv')
+df8 = pd.read_csv('defect-prediction/src/data/turk_labeled/abinit/abinit_8.csv')
+df9 = pd.read_csv('defect-prediction/src/data/turk_labeled/abinit/abinit_9.csv')
 frames = [df1,df2,df3,df4,df5,df6,df7,df8,df9]
 df = pd.concat(frames)
 
 df.drop('Name',axis=1, inplace=True)
-df_1 = pd.read_csv('abinit/abinit_10.csv')
+df_1 = pd.read_csv('defect-prediction/src/data/turk_labeled/abinit/abinit_10.csv')
 df_1.drop('Name',axis=1, inplace=True)
 
 df_train = df

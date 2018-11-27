@@ -223,8 +223,7 @@ class FFT(object):
                 elif level == 0:
                     threshold = self.first_thresholds[cue]
                 else:
-                    threshold = data[cue].median()
-                threshold = data[cue].median()
+                    threshold = data[cue].median()                
                 for direction in "><":
                     cur_selected = self.eval_point_split(level, cur_selected, cur_performance, data, cue, direction, threshold, decision)
         return cur_selected
